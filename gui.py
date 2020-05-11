@@ -9,30 +9,43 @@ from time import time
 import math
 import numpy as np
 ##################################################
-staff= "./staff"
+staff_Video= "./staff/Video"
+staff_HasMask_Video="./staff/Video/staff_HasMask_Video"
+staff_NoMask_Video="./staff/Video/staff_NoMask_Video"
 global next_step
 next_step = False
 ##################################################
 
 def checkAVI(name, result):
     global next_step
-    avifile = os.path.join(staff, name+".avi")
-    if os.path.exists(avifile):
+    StaffFolder = os.path.join(staff_Video, name)
+    if len(name)<1:
+        result.configure(text="輸入不可為空")
+    #create_folder(name, result)
+    #StaffFolder = os.path.join(staff_Video, name)
+    Mp4file = os.path.join(StaffFolder, name+".mp4")
+    if os.path.exists(Mp4file):
         result.configure(text="有相同檔案")
-    else:
-        result.configure(text="可以開始錄影")
-        next_step = True
     
+    else:
+       os.mkdir(StaffFolder)
+       result.configure(text="可以開始錄影")
+       next_step = True
+
+
+
+
 def opencamera(cap, name, camera_label, result_label):
+    StaffFolder = os.path.join(staff_Video, name)
     global next_step
-    if not os.path.exists(os.path.join(staff, name+".avi")):
+    if not os.path.exists(os.path.join(StaffFolder, name+".mp4")):
         if next_step:
             
             opened = True
             while opened:
                 total_time = 0
-                fourcc = cv2.VideoWriter_fourcc(*'XVID')
-                out = cv2.VideoWriter(os.path.join(staff, name+".avi"), fourcc, 30, (1920, 1080))
+                fourcc = cv2.VideoWriter_fourcc(*'MP4V')
+                out = cv2.VideoWriter(os.path.join(StaffFolder, name+".mp4"), fourcc, 30, (1920, 1080))
                 for i in range(5, 0, -1):
                     ret, frame = cap.read()
                     cv2.putText(frame, str(i), (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 3)
@@ -54,7 +67,7 @@ def opencamera(cap, name, camera_label, result_label):
                     if cv2.waitKey(1) & 0xFF == ord('q'):
                         out.release()
                         cv2.destroyAllWindows()
-                        os.remove(os.path.join(staff, name + ".avi"))
+                        os.remove(os.path.join(StaffFolder, name + ".mp4"))
                         break
                     total_time = time() - start_time
                     print(total_time)
