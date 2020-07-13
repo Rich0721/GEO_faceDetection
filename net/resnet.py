@@ -1,16 +1,22 @@
 import os
 import tensorflow as tf
-from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.layers import Flatten, Dense, Input, Conv2D, BatchNormalization, MaxPooling2D
-from tensorflow.python.keras.layers import GlobalAveragePooling2D, AveragePooling2D, Reshape, Activation, GlobalMaxPooling2D
-from tensorflow.python.keras import layers
-from tensorflow.python.keras import backend as K
+
+from keras.models import Model
+
+from keras.layers import Input, BatchNormalization, Reshape
+from keras.layers.core import Dense, Flatten, Dropout, Activation
+from keras.layers.convolutional import Conv2D, MaxPooling2D
+from keras.layers.pooling import GlobalAveragePooling2D, AveragePooling2D, GlobalMaxPooling2D
+from keras import layers
+from keras import backend as K
+from keras.callbacks import ModelCheckpoint, Callback, EarlyStopping
 from keras_applications.imagenet_utils import _obtain_input_shape
 from keras.engine.topology import get_source_inputs
 from keras.utils.data_utils import get_file
 from keras.utils import layer_utils
 import warnings
-
+from keras.preprocessing.image import ImageDataGenerator
+from keras.optimizers import Adam, SGD, RMSprop
 
 def resnet_identity_block(input_tensor, kernel_size, filters, stage, block, bias=False):
 
@@ -100,9 +106,7 @@ def resnet50(include_top=True, weights='vggface', input_tensor=None, input_shape
     else:
         bn_axis = 1
     
-    x = Conv2D(
-        64, (7, 7), use_bias=False, strides=(2, 2), padding='same',
-        name='conv1/7x7_s2')(img_input)
+    x = Conv2D(64, (7, 7), use_bias=False, strides=(2, 2), padding='same', name='conv1/7x7_s2')(img_input)
     x = BatchNormalization(axis=bn_axis, name='conv1/7x7_s2/bn')(x)
     x = Activation('relu')(x)
     x = MaxPooling2D((3, 3), strides=(2, 2))(x)
